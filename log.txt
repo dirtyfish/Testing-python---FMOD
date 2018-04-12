@@ -1,0 +1,2 @@
+[WRN] FMOD_OS_Output_GetDefault                : COM not initialized on this thread, call CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED) to avoid this.
+[WRN] SystemI::init                            : Output requires a sample rate of 44100Hz, resampling will occur.
