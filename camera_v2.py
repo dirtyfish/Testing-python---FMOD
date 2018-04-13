@@ -16,6 +16,13 @@ import numpy as np
 from vispy import app
 from vispy import gloo
 
+from moviepy.editor import *
+
+
+
+
+
+
 import random
 from ctypes import *
 import time
@@ -26,6 +33,8 @@ BANK_FILES = [ "Master Bank.bank", "Master Bank.strings.bank", "Weapons.bank","V
 
 studio_dll = None
 studio_sys = None
+time=1
+clip=VideoFileClip('bikes.wmv');
 
 def check_result(r):
     if r != 0:
@@ -93,6 +102,7 @@ fragment = """
     uniform sampler2D texture;
 
     uniform sampler2D texture2;
+    uniform sampler2D texture3;
     varying vec2 v_texcoord;
 
     
@@ -110,7 +120,7 @@ fragment = """
         gl_FragColor =gl_FragColor.bgra;}
 
          if ((v_texcoord.y<0.125)&&(v_texcoord.x<0.125))
-        gl_FragColor = float(v_texcoord.y<0.125)*float(v_texcoord.x<0.125)*texture2D(texture2, fract(v_texcoord*8.));   //rand pic
+        gl_FragColor = float(v_texcoord.y<0.125)*float(v_texcoord.x<0.125)*texture2D(texture3, fract(v_texcoord*8.));   //rand pic
 
         if(1>0)
         {if (v_texcoord.y>0.875)if (v_texcoord.x>0.125)//blue area
@@ -132,6 +142,8 @@ class Canvas(app.Canvas):
         self.program['position'] = [(-1, -1), (-1, +1), (+1, -1), (+1, +1)]
         self.program['texcoord'] = [(1, 1), (1, 0), (0, 1), (0, 0)]
         self.program['texture2'] = rtex=(1024*np.random.rand(480, 640, 3)).astype(np.uint8)#random texture
+        
+        self.program['texture3']=clip.get_frame(6);
         self.program['texture'] = np.zeros((480, 640, 3)).astype(np.uint8)#free space for cam texture
 
         #print (self.program['texture2'])
@@ -151,6 +163,8 @@ class Canvas(app.Canvas):
     def on_resize(self, event):
         width, height = event.physical_size
         gloo.set_viewport(0, 0, width, height)
+
+     
         play_sound("event:/UI/Cancel",0)
         check_result(studio_dll.FMOD_Studio_System_Update(studio_sys))
 
@@ -159,8 +173,14 @@ class Canvas(app.Canvas):
     def on_draw(self, event):
         gloo.clear('black')
         _, im = self.cap.read()
+        global time
+        time+=.01
+        self.program['texture3']=clip.get_frame(time%4);
         self.program['texture'][...] = im
         self.program.draw('triangle_strip')
+
+        #self.program['texture2'] = rtex=(1024*np.random.rand(480, 640, 3)).astype(np.uint8)#random texture
+       
         check_result(studio_dll.FMOD_Studio_System_Update(studio_sys))
         
     def on_timer(self, event):
