@@ -104,12 +104,21 @@ fragment = """
     uniform sampler2D texture2;
     uniform sampler2D texture3;
     varying vec2 v_texcoord;
+    uniform vec3      iResolution;           // viewport resolution (in pixels)
+    uniform float     iGlobalTime;           // shader playback time (in seconds)
+    uniform vec4      iMouse;                // mouse pixel coords
 
-    
+    float length(vec2 uv)
+    {
+    return sqrt(uv.x*uv.x+uv.y*uv.y);
+    }
 
     void main()
     {
         vec2 uv=v_texcoord-.5;
+        float t=iGlobalTime;
+
+
         gl_FragColor.b= .5-.5*(sqrt(uv.x*uv.x+uv.y*uv.y)); //background blue
 
         //gl_FragColor.r= 55.*(.5-(sqrt(uv.x*uv.x+uv.y*uv.y))); //background red
@@ -129,6 +138,9 @@ fragment = """
          if (v_texcoord.y<0.125)if (v_texcoord.x>0.125)//blue area
          gl_FragColor= vec4(0,0,0,1);    }
 
+         gl_FragColor += .05/vec4(length(uv+ .1*vec2(cos(t),sin(t))     ));
+         gl_FragColor += .05/vec4(length(uv+ .5*((iMouse.xy/iResolution.xy)-.5)     ));
+
         
         //gl_FragColor+=vec4(v_texcoord,0,0);
     }
@@ -145,7 +157,10 @@ class Canvas(app.Canvas):
         
         self.program['texture3']=clip.get_frame(6);
         self.program['texture'] = np.zeros((480, 640, 3)).astype(np.uint8)#free space for cam texture
-
+        self.program['iMouse'] = 0, 0, 0, 0
+        self.program['iGlobalTime'] = 0.
+        self.program['iResolution'] = (self.physical_size[0],
+                                       self.physical_size[1], 0.)
         #print (self.program['texture2'])
         #print (self.program['texture'])
         #print (rtex)
@@ -163,12 +178,18 @@ class Canvas(app.Canvas):
     def on_resize(self, event):
         width, height = event.physical_size
         gloo.set_viewport(0, 0, width, height)
-
+        self.program['iResolution'] = (self.physical_size[0],
+                                       self.physical_size[1], 0.)
      
         play_sound("event:/UI/Cancel",0)
         check_result(studio_dll.FMOD_Studio_System_Update(studio_sys))
 
-    
+    def on_mouse_move(self, event):
+        if event.is_dragging:
+            x, y = event.pos
+            px, py = event.press_event.pos
+            imouse = (x, self.size[1] - y, px, self.size[1] - py)
+            self.program['iMouse'] = imouse
 
     def on_draw(self, event):
         gloo.clear('black')
@@ -184,6 +205,8 @@ class Canvas(app.Canvas):
         check_result(studio_dll.FMOD_Studio_System_Update(studio_sys))
         
     def on_timer(self, event):
+
+        self.program['iGlobalTime'] = event.elapsed
         self.update()
      
    
