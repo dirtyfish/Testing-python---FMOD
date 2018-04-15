@@ -129,7 +129,7 @@ fragment = """
         gl_FragColor =gl_FragColor.bgra;}
 
          if ((v_texcoord.y<0.125)&&(v_texcoord.x<0.125))
-        gl_FragColor = float(v_texcoord.y<0.125)*float(v_texcoord.x<0.125)*texture2D(texture3, fract(v_texcoord*8.));   //rand pic
+        gl_FragColor = float(v_texcoord.y<0.125)*float(v_texcoord.x<0.125)*texture2D(texture3, fract(v_texcoord*8.));   //vid pic
 
         if(1>0)
         {if (v_texcoord.y>0.875)if (v_texcoord.x>0.125)//blue area
@@ -202,7 +202,7 @@ class Canvas(app.Canvas):
 
         #self.program['texture2'] = rtex=(1024*np.random.rand(480, 640, 3)).astype(np.uint8)#random texture
        
-        check_result(studio_dll.FMOD_Studio_System_Update(studio_sys))
+        #check_result(studio_dll.FMOD_Studio_System_Update(studio_sys))
         
     def on_timer(self, event):
 
