@@ -35,9 +35,9 @@ joystick = pygame.joystick.Joystick(0)
 joystick.init()  # initialize the first controller for reading
 numaxes = joystick.get_numaxes() # return the number of axes on the controller
 axis = [joystick.get_axis(i) for i in range(numaxes)] # get the analog value of the specified axis 
-print (numaxes)
+#print (numaxes)
 sumaxis = np.array([joystick.get_axis(i) for i in range(numaxes)]) # get the analog value of the specified axis 
-print (axis)
+#print (axis)
 
 
 
